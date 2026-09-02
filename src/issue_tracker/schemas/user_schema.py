@@ -2,6 +2,8 @@ import re
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from issue_tracker.schemas.response_schema import BasicResponse
+
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -52,4 +54,10 @@ class UserLogin(BaseModel):
 class AuthenticateUserResponse(BaseModel):
     access_token: str
     user: UserResponse
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfile(BasicResponse):
+    user: UserResponse
+
     model_config = ConfigDict(from_attributes=True)

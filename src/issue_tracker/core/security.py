@@ -4,6 +4,7 @@ import jwt
 from pwdlib import PasswordHash
 
 from issue_tracker.core.config import get_config
+from issue_tracker.types import ACCESS_TOKEN_COOKIE_DATA_TYPE
 
 
 class Security:
@@ -28,6 +29,7 @@ class Security:
             "iat": now,
             "iss": get_config().JWT_ISSUER,
             "type": "access",
+            "aud": get_config().AUDIENCE,
         }
 
         token = jwt.encode(
@@ -35,7 +37,7 @@ class Security:
         )
         return token
 
-    def verify_access_token(self, token: str) -> dict:
+    def verify_access_token(self, token: str) -> ACCESS_TOKEN_COOKIE_DATA_TYPE:
         """Verify the provided access token and return the decoded payload."""
         payload = jwt.decode(
             token,
@@ -50,9 +52,9 @@ class Security:
                     "type",
                 ]
             },
-            audience=get_config().JWT_ISSUER,
+            audience=get_config().AUDIENCE,
             issuer=get_config().JWT_ISSUER,
         )
         if payload.get("type") != "access":
             raise jwt.InvalidTokenError("Invalid token type. Expected 'access'.")
-        return payload
+        return {"user_id": payload["user_id"], "type": payload["type"]}

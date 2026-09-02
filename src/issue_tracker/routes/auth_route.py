@@ -26,7 +26,7 @@ async def register_user(user_data: UserCreate, db: Db_session):
 async def login_user(
     login_data: UserLogin, db: Db_session, response: Response
 ) -> UserResponse:
-    """Authenticate a user and return an access token."""
+    """Authenticate a user and set an access token cookie."""
     auth_service = AuthService(db)
     try:
         auth_response = await auth_service.authenticate_user(login_data)

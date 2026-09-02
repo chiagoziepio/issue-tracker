@@ -15,6 +15,7 @@ class Config(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     JWT_ISSUER: str = "issue-tracker"
+    AUDIENCE: str = "issue-tracker"
 
 
 @lru_cache

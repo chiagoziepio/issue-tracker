@@ -41,3 +41,15 @@ class UserResponse(BaseModel):
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AuthenticateUserResponse(BaseModel):
+    access_token: str
+    user: UserResponse
+    model_config = ConfigDict(from_attributes=True)

@@ -33,3 +33,9 @@ class UserRepository:
         self.db.add(new_user)
         await self.db.flush()  # Populates the auto-generated string ID
         return new_user
+
+    async def get_user_by_id(self, user_id: str) -> UserModel | None:
+        """Fetches a user from the database matching the provided ID."""
+        query = select(UserModel).where(UserModel.id == user_id)
+        result = await self.db.execute(query)
+        return result.scalar_one_or_none()

@@ -93,3 +93,16 @@ async def reset_access_token(
         raise HTTPException(status_code=e.status_code, detail=e.message)
     except Exception as e:  # noqa
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+
+
+@router.post("/logout", status_code=status.HTTP_200_OK, response_model=BasicResponse)
+async def logout_user(
+    response: Response,
+) -> BasicResponse:
+    """Logout the current user and remove the access token and refresh token cookie."""
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+    return BasicResponse(
+        message="Access token and refresh token cookies removed successfully",
+        status_code=status.HTTP_200_OK,
+    )

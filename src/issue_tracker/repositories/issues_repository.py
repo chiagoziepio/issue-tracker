@@ -1,8 +1,8 @@
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from issue_tracker.model.issues_model import IssueModel
-from issue_tracker.schemas.issues_schema import GetIssuesResquest
+from issue_tracker.model.issues_model import IssueModel, IssueStatus
+from issue_tracker.schemas.issues_schema import GetIssuesResquest, IssueCreate
 
 
 class IssuesRepository:
@@ -52,3 +52,15 @@ class IssuesRepository:
         issues = list(result.scalars().all())
 
         return issues, total_count
+
+    async def create_issue(self, user_id: str, issue_data: IssueCreate) -> IssueModel:
+        """Create a new issue in the database."""
+        new_issue = IssueModel(
+            title=issue_data.title,
+            description=issue_data.description,
+            status=IssueStatus.OPEN,
+            user_id=user_id,
+        )
+        self.db.add(new_issue)
+        await self.db.flush()
+        return new_issue

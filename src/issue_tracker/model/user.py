@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from issue_tracker.db.base import Base
+
+if TYPE_CHECKING:
+    from issue_tracker.model.issues_model import IssueModel
 
 
 class UserModel(Base):
@@ -31,4 +36,7 @@ class UserModel(Base):
         doc="Whether the user is active",
         nullable=False,
         default=True,
+    )
+    issues: Mapped[list["IssueModel"]] = relationship(
+        "IssueModel", back_populates="user"
     )

@@ -53,6 +53,7 @@ class UserLogin(BaseModel):
 
 class AuthenticateUserResponse(BaseModel):
     access_token: str
+    refresh_token: str
     user: UserResponse
     model_config = ConfigDict(from_attributes=True)
 

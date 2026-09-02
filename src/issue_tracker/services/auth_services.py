@@ -10,6 +10,7 @@ from issue_tracker.schemas.user_schema import (
     UserLogin,
     UserResponse,
 )
+from issue_tracker.types import COOKIE_TOKENS
 
 
 class AuthService:
@@ -54,7 +55,17 @@ class AuthService:
         if not user.is_active:
             raise UserError("User is not active", status_code=403)
 
-        access_token = self.security.generate_access_token(user.id)
+        cookies_data = self.generate_cookie_tokens(user.id)
+        access_token = cookies_data["access_token"]
+        refresh_token = cookies_data["refresh_token"]
         return AuthenticateUserResponse(
-            access_token=access_token, user=UserResponse.model_validate(user)
+            access_token=access_token,
+            user=UserResponse.model_validate(user),
+            refresh_token=refresh_token,
         )
+
+    def generate_cookie_tokens(self, user_id: str) -> COOKIE_TOKENS:
+        access_token = self.security.generate_access_token(user_id)
+        refresh_token = self.security.generate_fresh_token(user_id)
+
+        return {"access_token": access_token, "refresh_token": refresh_token}

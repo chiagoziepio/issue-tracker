@@ -16,6 +16,7 @@ class Config(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     JWT_ISSUER: str = "issue-tracker"
     AUDIENCE: str = "issue-tracker"
+    JWT_FRESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
 
 
 @lru_cache

@@ -6,8 +6,10 @@ from issue_tracker.db.session import Db_session
 from issue_tracker.deps.user_auth_deps import CURRENT_USER_DEP
 from issue_tracker.Errors.issue_error import IssueError
 from issue_tracker.schemas.issues_schema import (
+    BasicResponse,
     GetIssuesResponse,
     GetIssuesResquest,
+    GetSingleIssueResponse,
     IssueCreate,
     IssueMutationResponse,
     IssueResponse,
@@ -117,6 +119,57 @@ async def update_issue_details(
         return IssueMutationResponse(
             issue=IssueResponse.model_validate(issue),
             message="Issue details updated successfully",
+            status_code=status.HTTP_200_OK,
+        )
+    except IssueError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:  # noqa
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+
+
+@router.get(
+    "/{issue_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=GetSingleIssueResponse,
+)
+async def get_single_issue(
+    issue_id: str,
+    current_user: CURRENT_USER_DEP,
+    db: Db_session,
+) -> GetSingleIssueResponse:
+    """Get a single issue."""
+
+    issue_service = IssuesService(db)
+    try:
+        issue = await issue_service.get_issue(current_user.id, issue_id)
+        return GetSingleIssueResponse(
+            message="Issue retrieved successfully",
+            status_code=status.HTTP_200_OK,
+            issue=IssueResponse.model_validate(issue),
+        )
+    except IssueError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:  # noqa
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+
+
+@router.delete(
+    "/{issue_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=BasicResponse,
+)
+async def delete_issue(
+    issue_id: str,
+    current_user: CURRENT_USER_DEP,
+    db: Db_session,
+) -> BasicResponse:
+    """Delete a single issue."""
+
+    issue_service = IssuesService(db)
+    try:
+        await issue_service.delete_issue(current_user.id, issue_id)
+        return BasicResponse(
+            message="Issue deleted successfully",
             status_code=status.HTTP_200_OK,
         )
     except IssueError as e:

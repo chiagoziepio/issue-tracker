@@ -33,7 +33,7 @@ class IssuesRepository:
             .where(IssueModel.status != "DELETED")
         )
 
-        if status:
+        if status and status != IssueStatus.DELETED:
             query = query.where(IssueModel.status == status)
 
         if search:
@@ -102,5 +102,25 @@ class IssuesRepository:
 
         issue.title = title
         issue.description = description
+        await self.db.flush()
+        return issue
+
+    async def get_issue(self, user_id: str, issue_id: str) -> IssueModel | None:
+        query = (
+            select(IssueModel)
+            .where(IssueModel.user_id == user_id)
+            .where(IssueModel.id == issue_id)
+        )
+        result = await self.db.execute(query)
+        issue = result.scalar_one_or_none()
+        return issue
+
+    async def delete_issue(self, user_id: str, issue_id: str) -> IssueModel:
+        issue = await self.get_issue(user_id, issue_id)
+        if not issue:
+            raise ValueError(f"Issue with id {issue_id} not found")
+        if issue.user_id != user_id:
+            raise ValueError("You are not authorized to delete this issue")
+        issue.status = IssueStatus.DELETED
         await self.db.flush()
         return issue

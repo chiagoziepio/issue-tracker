@@ -64,3 +64,8 @@ class UpdateIssueDetialsRequest(BaseModel):
     description: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class GetSingleIssueResponse(BasicResponse):
+    issue: IssueResponse
+    model_config = ConfigDict(from_attributes=True)

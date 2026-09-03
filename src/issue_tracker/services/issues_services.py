@@ -69,3 +69,23 @@ class IssuesService:
             raise IssueError(
                 f"An error occurred while updating the issue details: {e!s}"
             )
+
+    async def get_issue(self, user_id: str, issue_id: str) -> IssueModel:
+        """Get an issue from the database."""
+        try:
+            issue = await self.issues_repo.get_issue(user_id, issue_id)
+
+            if not issue:
+                raise IssueError(f"Issue with id {issue_id} not found")
+            return issue
+        except Exception as e:  # noqa
+            raise IssueError(f"An error occurred while getting the issue: {e!s}")
+
+    async def delete_issue(self, user_id: str, issue_id: str):
+        """Delete an issue from the database."""
+        try:
+            await self.issues_repo.delete_issue(user_id, issue_id)
+            await self.db.commit()
+            return True
+        except Exception as e:  # noqa
+            raise IssueError(f"An error occurred while deleting the issue: {e!s}")

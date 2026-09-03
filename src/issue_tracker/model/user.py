@@ -1,3 +1,4 @@
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from sqlalchemy import String, text
@@ -7,6 +8,11 @@ from issue_tracker.db.base import Base
 
 if TYPE_CHECKING:
     from issue_tracker.model.issues_model import IssueModel
+
+
+class UserRole(StrEnum):
+    ADMIN = "ADMIN"
+    USER = "USER"
 
 
 class UserModel(Base):
@@ -39,4 +45,10 @@ class UserModel(Base):
     )
     issues: Mapped[list["IssueModel"]] = relationship(
         "IssueModel", back_populates="user"
+    )
+    role: Mapped[UserRole] = mapped_column(
+        doc="The user's role",
+        nullable=False,
+        default=UserRole.USER,
+        server_default=UserRole.USER.value,
     )

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
-from issue_tracker.db.db_connect import db_connect
+from issue_tracker.db.lifespan import lifespan
 from issue_tracker.handlers.exception_handlers import validation_exception_handler
 
 # Register all SQLAlchemy models before any request can configure their mappers.
@@ -13,14 +13,14 @@ app = FastAPI(
     title="Issue Tracker",
     description="A simple issue tracker",
     version="0.1.0",
-    lifespan=db_connect,
+    lifespan=lifespan,
 )
 
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,  # MUST be False when using ["*"]
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

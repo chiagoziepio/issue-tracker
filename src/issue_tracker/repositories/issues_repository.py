@@ -5,6 +5,7 @@ from issue_tracker.model.issues_model import IssueModel, IssueStatus
 from issue_tracker.schemas.issues_schema import (
     GetIssuesResquest,
     IssueCreate,
+    UpdateIssueDetialsRequest,
     UpdateIssueStatusRequest,
 )
 
@@ -26,7 +27,11 @@ class IssuesRepository:
         page = query_info.page
         status = query_info.status
 
-        query = select(IssueModel).where(IssueModel.user_id == user_id)
+        query = (
+            select(IssueModel)
+            .where(IssueModel.user_id == user_id)
+            .where(IssueModel.status != "DELETED")
+        )
 
         if status:
             query = query.where(IssueModel.status == status)
@@ -79,5 +84,23 @@ class IssuesRepository:
         if issue.user_id != user_id:
             raise ValueError("You are not authorized to update this issue")
         issue.status = status.status  # type: ignore
+        await self.db.flush()
+        return issue
+
+    async def update_issue_detials(
+        self, user_id: str, issue_id: str, issue_data: UpdateIssueDetialsRequest
+    ) -> IssueModel:
+        """Update the details of an issue"""
+        issue = await self.db.get(IssueModel, issue_id)
+        if not issue:
+            raise ValueError(f"Issue with id {issue_id} not found")
+        if issue.user_id != user_id:
+            raise ValueError("You are not authorized to update this issue")
+
+        title = issue_data.title or issue.title
+        description = issue_data.description or issue.description
+
+        issue.title = title
+        issue.description = description
         await self.db.flush()
         return issue

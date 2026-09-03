@@ -38,7 +38,7 @@ class IssueCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class CreateIssueResponse(BasicResponse):
+class IssueMutationResponse(BasicResponse):
     issue: IssueResponse
     model_config = ConfigDict(from_attributes=True)
 
@@ -56,4 +56,11 @@ class UpdateIssueStatusRequest(BaseModel):
 
 class UpdateIssueStatusResponse(BasicResponse):
     issue: IssueResponse
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UpdateIssueDetialsRequest(BaseModel):
+    title: str | None = None
+    description: str | None = None
+
     model_config = ConfigDict(from_attributes=True)

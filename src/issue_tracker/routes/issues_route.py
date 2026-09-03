@@ -6,13 +6,13 @@ from issue_tracker.db.session import Db_session
 from issue_tracker.deps.user_auth_deps import CURRENT_USER_DEP
 from issue_tracker.Errors.issue_error import IssueError
 from issue_tracker.schemas.issues_schema import (
-    CreateIssueResponse,
     GetIssuesResponse,
     GetIssuesResquest,
     IssueCreate,
+    IssueMutationResponse,
     IssueResponse,
+    UpdateIssueDetialsRequest,
     UpdateIssueStatusRequest,
-    UpdateIssueStatusResponse,
 )
 from issue_tracker.services.issues_services import IssuesService
 
@@ -45,16 +45,16 @@ async def get_user_issues(
 
 
 @router.post(
-    "/", status_code=status.HTTP_201_CREATED, response_model=CreateIssueResponse
+    "/", status_code=status.HTTP_201_CREATED, response_model=IssueMutationResponse
 )
 async def issue_creation(
     issue_data: IssueCreate, current_user: CURRENT_USER_DEP, db: Db_session
-) -> CreateIssueResponse:
+) -> IssueMutationResponse:
     """Create a new issue."""
     issue_service = IssuesService(db)
     try:
         new_issue = await issue_service.create_new_issue(current_user.id, issue_data)
-        return CreateIssueResponse(
+        return IssueMutationResponse(
             message="Issue created successfully",
             status_code=status.HTTP_201_CREATED,
             issue=IssueResponse.model_validate(new_issue),
@@ -68,14 +68,14 @@ async def issue_creation(
 @router.put(
     "/{issue_id}/status",
     status_code=status.HTTP_200_OK,
-    response_model=UpdateIssueStatusResponse,
+    response_model=IssueMutationResponse,
 )
 async def update_issue_status(
     issue_id: str,
     new_status: UpdateIssueStatusRequest,
     current_user: CURRENT_USER_DEP,
     db: Db_session,
-) -> UpdateIssueStatusResponse:
+) -> IssueMutationResponse:
     """Update the status of an issue."""
 
     issue_service = IssuesService(db)
@@ -84,9 +84,39 @@ async def update_issue_status(
         issue = await issue_service.update_issue_status(
             current_user.id, issue_id, new_status
         )
-        return UpdateIssueStatusResponse(
+        return IssueMutationResponse(
             issue=IssueResponse.model_validate(issue),
             message="Issue status updated successfully",
+            status_code=status.HTTP_200_OK,
+        )
+    except IssueError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:  # noqa
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+
+
+@router.put(
+    "/{issue_id}/details",
+    status_code=status.HTTP_200_OK,
+    response_model=IssueMutationResponse,
+)
+async def update_issue_details(
+    issue_id: str,
+    issue_data: UpdateIssueDetialsRequest,
+    current_user: CURRENT_USER_DEP,
+    db: Db_session,
+) -> IssueMutationResponse:
+    """Update the details of an issue."""
+
+    issue_service = IssuesService(db)
+
+    try:
+        issue = await issue_service.update_issue_detials(
+            current_user.id, issue_id, issue_data
+        )
+        return IssueMutationResponse(
+            issue=IssueResponse.model_validate(issue),
+            message="Issue details updated successfully",
             status_code=status.HTTP_200_OK,
         )
     except IssueError as e:

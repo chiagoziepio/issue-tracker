@@ -6,6 +6,7 @@ from issue_tracker.repositories.issues_repository import IssuesRepository
 from issue_tracker.schemas.issues_schema import (
     GetIssuesResquest,
     IssueCreate,
+    UpdateIssueDetialsRequest,
     UpdateIssueStatusRequest,
 )
 
@@ -52,4 +53,19 @@ class IssuesService:
         except Exception as e:  # noqa
             raise IssueError(
                 f"An error occurred while updating the issue status: {e!s}"
+            )
+
+    async def update_issue_detials(
+        self, user_id: str, issue_id: str, issue_data: UpdateIssueDetialsRequest
+    ) -> IssueModel:
+        """Update the details of an issue in the database."""
+        try:
+            issue = await self.issues_repo.update_issue_detials(
+                user_id, issue_id, issue_data
+            )
+            await self.db.commit()
+            return issue
+        except Exception as e:  # noqa
+            raise IssueError(
+                f"An error occurred while updating the issue details: {e!s}"
             )

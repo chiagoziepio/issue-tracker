@@ -8,7 +8,7 @@ from jwt import InvalidTokenError
 from issue_tracker.core.security import Security
 from issue_tracker.db.session import Db_session
 from issue_tracker.Errors.user_error import UserError
-from issue_tracker.model.user import UserModel
+from issue_tracker.model.user import UserModel, UserRole
 from issue_tracker.repositories.user_repository import UserRepository
 from issue_tracker.types import (
     ACCESS_TOKEN_COOKIE_DATA_TYPE,
@@ -106,3 +106,16 @@ async def get_current_user_from_refresh_token(
 CURRENT_USER_FROM_REFRESH_TOKEN_DEP = Annotated[
     UserModel, Depends(get_current_user_from_refresh_token)
 ]
+
+
+def require_role(role: UserRole):
+    """Dependency to check if the current user has the required role."""
+
+    async def _require_role(current_user: CURRENT_USER_DEP):
+        if current_user.role != role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have the required role",
+            )
+
+    return _require_role

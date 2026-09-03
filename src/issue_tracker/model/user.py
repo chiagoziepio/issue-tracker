@@ -1,7 +1,9 @@
+from datetime import datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
-from sqlalchemy import String, text
+from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from issue_tracker.db.base import Base
@@ -24,7 +26,7 @@ class UserModel(Base):
         unique=True,
         index=True,
         doc="The user's id",
-        server_default=text("(hex(randomblob(16)))"),
+        default=lambda: uuid4().hex.upper(),
     )
     email: Mapped[str] = mapped_column(
         String(255),
@@ -51,4 +53,17 @@ class UserModel(Base):
         nullable=False,
         default=UserRole.USER,
         server_default=UserRole.USER.value,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )

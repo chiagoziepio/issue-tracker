@@ -3,7 +3,15 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
 from issue_tracker.db.lifespan import lifespan
-from issue_tracker.handlers.exception_handlers import validation_exception_handler
+from issue_tracker.Errors.admin_error import AdminError
+from issue_tracker.Errors.issue_error import IssueError
+from issue_tracker.Errors.user_error import UserError
+from issue_tracker.handlers.exception_handlers import (
+    admin_error_handler,
+    issue_error_handler,
+    user_error_handler,
+    validation_exception_handler,
+)
 
 # Register all SQLAlchemy models before any request can configure their mappers.
 from issue_tracker.model import issues_model  # noqa: F401
@@ -31,6 +39,9 @@ app.add_middleware(
 )
 
 app.exception_handler(RequestValidationError)(validation_exception_handler)
+app.exception_handler(UserError)(user_error_handler)
+app.exception_handler(AdminError)(admin_error_handler)
+app.exception_handler(IssueError)(issue_error_handler)
 
 
 app.include_router(auth_route.router)

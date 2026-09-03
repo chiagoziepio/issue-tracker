@@ -94,10 +94,10 @@ async def get_current_user_from_refresh_token(
         user = await user_repo.get_user_by_id(refresh_token["user_id"])
         if not user:
             raise UserError(
-                status_code=status.HTTP_404_NOT_FOUND, message="User not found"
+                status_code=status.HTTP_401_UNAUTHORIZED, message="User not found"
             )
-    except UserError as e:
-        raise UserError(message=str(e.message), status_code=e.status_code)
+    except UserError:
+        raise
     except Exception as e:  # noqa
         raise UserError(message=f"An error occurred while fetching the user: {e!s}")
     return user

@@ -1,7 +1,8 @@
 from enum import StrEnum
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
-from sqlalchemy import ForeignKey, String, text
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from issue_tracker.db.base import Base
@@ -25,7 +26,7 @@ class IssueModel(Base):
         unique=True,
         index=True,
         doc="The issue's id",
-        server_default=text("(hex(randomblob(16)))"),
+        default=lambda: uuid4().hex.upper(),
     )
     title: Mapped[str] = mapped_column(doc="The issue's title", nullable=False)
     description: Mapped[str] = mapped_column(

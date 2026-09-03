@@ -1,8 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from issue_tracker.Errors.issue_error import IssueError
+from issue_tracker.model.issues_model import IssueModel
 from issue_tracker.repositories.issues_repository import IssuesRepository
-from issue_tracker.schemas.issues_schema import GetIssuesResquest, IssueCreate
+from issue_tracker.schemas.issues_schema import (
+    GetIssuesResquest,
+    IssueCreate,
+    UpdateIssueStatusRequest,
+)
 
 
 class IssuesService:
@@ -33,3 +38,18 @@ class IssuesService:
             return new_issue
         except Exception as e:  # noqa
             raise IssueError(f"An error occurred while creating the new issue: {e!s}")
+
+    async def update_issue_status(
+        self, user_id: str, issue_id: str, status: UpdateIssueStatusRequest
+    ) -> IssueModel:
+        """Update the status of an issue in the database."""
+        try:
+            issue = await self.issues_repo.update_issue_status(
+                user_id, issue_id, status
+            )
+            await self.db.commit()
+            return issue
+        except Exception as e:  # noqa
+            raise IssueError(
+                f"An error occurred while updating the issue status: {e!s}"
+            )

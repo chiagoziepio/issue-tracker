@@ -11,6 +11,8 @@ from issue_tracker.schemas.issues_schema import (
     GetIssuesResquest,
     IssueCreate,
     IssueResponse,
+    UpdateIssueStatusRequest,
+    UpdateIssueStatusResponse,
 )
 from issue_tracker.services.issues_services import IssuesService
 
@@ -56,6 +58,36 @@ async def issue_creation(
             message="Issue created successfully",
             status_code=status.HTTP_201_CREATED,
             issue=IssueResponse.model_validate(new_issue),
+        )
+    except IssueError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:  # noqa
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
+
+
+@router.put(
+    "/{issue_id}/status",
+    status_code=status.HTTP_200_OK,
+    response_model=UpdateIssueStatusResponse,
+)
+async def update_issue_status(
+    issue_id: str,
+    new_status: UpdateIssueStatusRequest,
+    current_user: CURRENT_USER_DEP,
+    db: Db_session,
+) -> UpdateIssueStatusResponse:
+    """Update the status of an issue."""
+
+    issue_service = IssuesService(db)
+
+    try:
+        issue = await issue_service.update_issue_status(
+            current_user.id, issue_id, new_status
+        )
+        return UpdateIssueStatusResponse(
+            issue=IssueResponse.model_validate(issue),
+            message="Issue status updated successfully",
+            status_code=status.HTTP_200_OK,
         )
     except IssueError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)

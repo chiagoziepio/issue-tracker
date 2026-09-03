@@ -2,7 +2,11 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from issue_tracker.model.issues_model import IssueModel, IssueStatus
-from issue_tracker.schemas.issues_schema import GetIssuesResquest, IssueCreate
+from issue_tracker.schemas.issues_schema import (
+    GetIssuesResquest,
+    IssueCreate,
+    UpdateIssueStatusRequest,
+)
 
 
 class IssuesRepository:
@@ -64,3 +68,16 @@ class IssuesRepository:
         self.db.add(new_issue)
         await self.db.flush()
         return new_issue
+
+    async def update_issue_status(
+        self, user_id: str, issue_id: str, status: UpdateIssueStatusRequest
+    ) -> IssueModel:
+        """Update the status of an issue in the database."""
+        issue = await self.db.get(IssueModel, issue_id)
+        if not issue:
+            raise ValueError(f"Issue with id {issue_id} not found")
+        if issue.user_id != user_id:
+            raise ValueError("You are not authorized to update this issue")
+        issue.status = status.status  # type: ignore
+        await self.db.flush()
+        return issue

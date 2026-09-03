@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from issue_tracker.model.issues_model import IssueStatus
@@ -37,5 +39,21 @@ class IssueCreate(BaseModel):
 
 
 class CreateIssueResponse(BasicResponse):
+    issue: IssueResponse
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UpdateIssueStatusEnum(StrEnum):
+    CLOSED = "CLOSED"
+    REOPENED = "REOPENED"
+
+
+class UpdateIssueStatusRequest(BaseModel):
+    status: UpdateIssueStatusEnum
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UpdateIssueStatusResponse(BasicResponse):
     issue: IssueResponse
     model_config = ConfigDict(from_attributes=True)

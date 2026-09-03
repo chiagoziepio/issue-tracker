@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 
 from issue_tracker.db.db_connect import db_connect
 from issue_tracker.handlers.exception_handlers import validation_exception_handler
@@ -15,6 +16,14 @@ app = FastAPI(
     lifespan=db_connect,
 )
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,  # MUST be False when using ["*"]
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.exception_handler(RequestValidationError)(validation_exception_handler)
 
